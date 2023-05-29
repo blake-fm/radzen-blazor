@@ -1850,7 +1850,7 @@ namespace Radzen.Blazor
         /// <inheritdoc />
         public override async Task SetParametersAsync(ParameterView parameters)
         {
-            bool emptyTextChanged = false, allowColumnPickingChanged = false, valueChanged = false, allGroupsExpandedChanged = false;
+            bool emptyTextChanged = false, allowColumnPickingChanged = false, valueChanged = false, allGroupsExpandedChanged = false, selectionModeChanged = false;
 
             foreach (var parameter in parameters) {
                 switch (parameter.Name) {
@@ -1870,10 +1870,25 @@ namespace Radzen.Blazor
 
                     case nameof(Value):
                         valueChanged = HasChanged(parameter.Value, Value); break;
+
+                    case nameof(SelectionMode):
+                        selectionModeChanged = HasChanged(parameter.Value, SelectionMode); break;
                 }
             }
 
             await base.SetParametersAsync(parameters);
+
+            if (selectionModeChanged && SelectionMode == DataGridSelectionMode.Single)
+            {
+                if (selectedItems.Count > 1)
+                {
+                    selectedItems.Clear();
+                }
+                if (Value?.Count > 1)
+                {
+                    Value.Clear();
+                }
+            }
 
             if (valueChanged)
             {
